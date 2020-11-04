@@ -1,1 +1,1 @@
-{"pocket": ["turtle", "fishing rod"], "spaces": 5, "name": "eden"}
+{"spaces": 5, "objects": [], "name": "eden"}

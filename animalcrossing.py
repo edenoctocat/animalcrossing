@@ -127,18 +127,28 @@ import json
 
 #main
 
-f = open('pocket.txt', 'w')
-my_pocket = {
-	'name':'eden',
-	'pocket':['turtle', 'fishing rod'],
-	'spaces':5
-}
-y = json.dumps(my_pocket)
-f.write(y)
+f = open('pocket.txt', 'r')
+print(f.read())
+if f.read() == '': 
+	f = open('pocket.txt', 'w')
+	pocket = {
+		'name':'eden',
+		'objects':[],
+		'spaces':5
+	}
+	y = json.dumps(pocket)
+	f.write(y)
+	f.close()
+f = open('pocket.txt', 'r')
+y = json.loads(f.read())
 f.close()
-quit()
+print(y['name'])
+for object in y['objects']:
+	print(object)
+print(y['spaces'])
 
-my_pocket = Pocket( 5)
+
+my_pocket = Pocket(y['objects'], y['spaces'])
 print('\nmy pocket contains:')
 my_pocket.list()
 print('')		
@@ -177,3 +187,12 @@ else: pass
 
 #walk = raw_input('do you want to walk around yor island? ')
 
+f = open('pocket.txt', 'w')
+lpocket = {
+	'name':'eden',
+	'objects':my_pocket.inventory,
+	'spaces':my_pocket.spaces
+}
+y = json.dumps(lpocket)
+f.write(y)
+f.close()
