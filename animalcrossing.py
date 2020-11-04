@@ -125,6 +125,11 @@ class Pocket:
 
 #main
 
+f = open('pocket.txt', 'a')
+f.write('hello mongbean and the turtle hunter (we all know tht thoose are their real names)')
+f.close()
+quit()
+
 my_pocket = Pocket(['stone', 'sea bass'], 5)
 print('\nmy pocket contains:')
 my_pocket.list()
