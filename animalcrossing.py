@@ -5,6 +5,10 @@ class Island:
 	def __init__(self):
 		pass
 
+class Player:
+	def __init__(self, name):
+		self.name = name
+
 class Tree:
 	def __init__(self, type, probstick, probbell):
 		self.type = type
@@ -125,30 +129,30 @@ class Pocket:
 
 import json
 
-#main
+# main
 
-f = open('pocket.txt', 'r')
-print(f.read())
-if f.read() == '': 
-	f = open('pocket.txt', 'w')
+name = raw_input('name: ')
+
+try:
+	f = open(name+'pocket.txt', 'r')
+	x = f.read()
+	y = json.loads(x)
+	f.close()
+	print(y['name'])
+	for object in y['objects']:
+		print(object)
+	print(y['spaces'])
+	my_pocket = Pocket(y['objects'], y['spaces'])
+except:
+	f = open(name+'pocket.txt', 'w')
+	f.close()
 	pocket = {
-		'name':'eden',
+		'name':name,
 		'objects':[],
 		'spaces':5
 	}
-	y = json.dumps(pocket)
-	f.write(y)
-	f.close()
-f = open('pocket.txt', 'r')
-y = json.loads(f.read())
-f.close()
-print(y['name'])
-for object in y['objects']:
-	print(object)
-print(y['spaces'])
+	my_pocket = Pocket(pocket['objects'], pocket['spaces'])
 
-
-my_pocket = Pocket(y['objects'], y['spaces'])
 print('\nmy pocket contains:')
 my_pocket.list()
 print('')		
@@ -187,9 +191,9 @@ else: pass
 
 #walk = raw_input('do you want to walk around yor island? ')
 
-f = open('pocket.txt', 'w')
+f = open(name+'pocket.txt', 'w')
 lpocket = {
-	'name':'eden',
+	'name':name,
 	'objects':my_pocket.inventory,
 	'spaces':my_pocket.spaces
 }
