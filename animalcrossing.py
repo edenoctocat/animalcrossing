@@ -1,5 +1,7 @@
 import random
 import shapemodule
+import re
+import json
 
 class Island:
 	def __init__(self):
@@ -98,12 +100,10 @@ class River(BodyOfWater):
 	def fishin(self):
 		pass
 
-class Pocket:
+class Pocket(Player):
 	def __init__(self, inventory, spaces):
 		self.inventory = inventory
 		self.spaces = spaces
-		for object in self.inventory: 
-			self.spaces -= 1
 
 	def add(self, object):
 		if self.checkspaces() == False:
@@ -119,15 +119,21 @@ class Pocket:
 			return True
 
 	def takeout(self, object):
-		self.inventory.remove(object)
-		self.spaces += 1
+		try:
+			self.inventory.remove(object)
+			self.spaces += 1
+		except:
+			print('you do not have that item in your pocket')
+
+	def empty(self):
+		for object in self.inventory:
+			self.spaces += 1
+		del self.inventory[:]
 
 	def list(self):
 		for object in self.inventory: 
 			print(object)
 
-
-import json
 
 # main
 
@@ -165,10 +171,12 @@ a1 = raw_input('\nwalking towards a tree...')
 #my_pocket.list()
 #print('')
 
-this_tree = Tree('maple', 3, 1)
+this_tree = Tree('maple', 5, 1)
 this_tree.draw()
 shaketree = raw_input('do you want to shake this tree? ')
-if shaketree == 'yes':
+x = re.search('^[yY]', shaketree)
+y = re.search('^[oO]', shaketree)
+if x or y:
 	this_tree.shake()
 else:
 	pass
@@ -179,7 +187,9 @@ my_pocket.list()
 a3 = raw_input('')
 
 fishing = raw_input('do you want to go fishing? ')
-if fishing == 'yes':
+x = re.search('^[yY]', fishing)
+y = re.search('^[oO]', fishing)
+if x or y:
 	a2 = raw_input('\ngoing to the ocean...')
 	myocean = Ocean(['dace', 'sea bass', 'horse mackerel', 'red snapper', 'barred knifejaw', 'sea bass', 'sea bass', 'olive flounder', 'dace', 'shark'])
 	myocean.fishin()
@@ -187,9 +197,24 @@ if fishing == 'yes':
 	print('my pocket contains: ')
 	my_pocket.list()
 	print('')
-else: pass		
 
-#walk = raw_input('do you want to walk around yor island? ')
+remove = raw_input('\ndo you want to take anything out of your pocket? ')
+x = re.search('^[yY]', remove)
+y = re.search('^[oO]', remove)
+if x or y:
+	removewhat = raw_input('what would you like to take out of your pocket? ')
+	if removewhat == 'all' or removewhat == 'everything':
+		my_pocket.empty()
+	else:
+		items = re.split(",\s", removewhat)
+		for item in items:
+			my_pocket.takeout(item)
+
+print('\nmy pocket contains:')
+my_pocket.list()
+print('')
+
+#walk = raw_input('do you want to walk around your island? ')
 
 f = open(name+'pocket.txt', 'w')
 lpocket = {
