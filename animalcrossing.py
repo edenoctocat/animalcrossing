@@ -87,7 +87,7 @@ class Ocean(BodyOfWater):
 		self.fishlist = fishlist
 
 	def fishin(self):
-		o1 = raw_input('waiting for a fish to bite...')
+		o1 = raw_input('\nwaiting for a fish to bite...')
 		o2 = raw_input('\na fish bit the line!')
 		fish = random.choice(self.fishlist)
 		print('\nI caught a ' + fish)
@@ -99,6 +99,55 @@ class River(BodyOfWater):
 
 	def fishin(self):
 		pass
+
+class Beach(Island):
+	def __init__(self, findlist):
+		self.findlist = findlist
+
+	def comb(self):
+		c1 = raw_input('\nwalking along the beach...')
+		beachobject = random.choice(self.findlist)
+		print('\nI found a ' + beachobject)
+		if re.search('shell', beachobject + ' !'):
+			this_shell = Shell(beachobject)
+			this_shell.draw()
+		else:
+			pass
+		pickup = raw_input('do you want to pick it up? ')
+		if re.search('^[Yy]', pickup):
+			my_pocket.add(beachobject)
+		else:
+			pass 
+
+class Shell(Beach):
+	def __init__(self, type):
+		self.type = type
+
+	def draw(self):
+		my_canvas = shapemodule.Canvas(40, 12)
+		circle = shapemodule.Circle(4, 5, 5)
+		circle.paint(my_canvas, '| ')
+		dot1 = shapemodule.Rectangle(2, 3, 1, 1)
+		dot1.paint(my_canvas, '( ')
+		dot2 = shapemodule.Rectangle(8, 3, 1, 1)
+		dot2.paint(my_canvas, ') ')
+		top = shapemodule.Rectangle(3, 2, 5, 1)
+		top.paint(my_canvas, 'n ')
+		side1 = shapemodule.Rectangle(2, 6, 1, 1)
+		side1.paint(my_canvas, '\\ ')
+		side2 = shapemodule.Rectangle(8, 6, 1, 1)
+		side2.paint(my_canvas, '/ ')
+		side3 = shapemodule.Rectangle(3, 7, 1, 1)
+		side3.paint(my_canvas, '\\ ')
+		side4 = shapemodule.Rectangle(7, 7, 1, 1)
+		side4.paint(my_canvas, '/ ')
+		side5 = shapemodule.Rectangle(4, 8, 1, 1)
+		side5.paint(my_canvas, '/ ')
+		side6 = shapemodule.Rectangle(6, 8, 1, 1)
+		side6.paint(my_canvas, '\\ ')
+		base = shapemodule.Rectangle(3, 9, 5, 1)
+		base.paint(my_canvas, '- ')
+		my_canvas.display()
 
 class Pocket(Player):
 	def __init__(self, inventory, spaces):
@@ -134,9 +183,6 @@ class Pocket(Player):
 		for object in self.inventory: 
 			print(object)
 
-
-# main
-
 name = raw_input('name: ')
 
 try:
@@ -162,59 +208,122 @@ except:
 print('\nmy pocket contains:')
 my_pocket.list()
 print('')		
-a1 = raw_input('\nwalking towards a tree...')
 
-#this_object = raw_input('object to add to pockets: ')
-#my_pocket.add(this_object)
-#print('')		
-#print('my pocket now contains:')
-#my_pocket.list()
-#print('')
+def main():
+#	print('options for things to do: \n   shake a tree (st) \n   go fishing (fi) \n   access pocket (ap) \n   walk around the island (wk) \n   chop wood (cw) \n   craft DIY projects (diy) \n   collect shells (cs) \n   catch bugs (cb) \n   go to house/tent (gth) \n   look at nook phone (lnp) \n') 
+	whereto = raw_input('\nwhere do you want to go? ')
+	if re.search('[Bb]each', whereto) or re.search('[Oo]cean', whereto):
+		a1 = raw_input('\nwalking to the beach...')
+		def beach_actions():
+			action = raw_input('\nwhat do you want to do? (go fishing, beachcombing) ')
+			if re.search('[Ff]ish', action):
+				myocean = Ocean(['dace', 'sea bass', 'horse mackerel', 'red snapper', 'barred knifejaw', 'sea bass', 'sea bass', 'olive flounder', 'dace', 'shark'])
+				myocean.fishin()
+				a2 = raw_input('')
+				print('my pocket contains: ')
+				my_pocket.list()
+				print('')
+			elif re.search('[Bb]eachcomb', action) or re.search('[Ss]hell', action):
+				this_beach = Beach(['venus comb shell', 'sand dollar', 'cowrie shell', 'message bottle', 'conch shell'])
+				this_beach.comb()
+				a3 = raw_input('')
+				print('my pocket contains: ')
+				my_pocket.list()
+				print('')
+			else: pass
 
-this_tree = Tree('maple', 5, 1)
-this_tree.draw()
-shaketree = raw_input('do you want to shake this tree? ')
-x = re.search('^[yY]', shaketree)
-y = re.search('^[oO]', shaketree)
-if x or y:
-	this_tree.shake()
-else:
-	pass
+		beach_actions()
+		leave = raw_input('do you want to go somewhere else? ')
+		if re.search('^[Nn]', leave):
+			beach_actions()
+		elif re.search('^[Yy]', leave):
+			pass
 
-print('\nmy pocket contains:')
-my_pocket.list()
+	elif re.search('[Hh]ouse', whereto) or re.search('[Hh]ome', whereto):
+		b1 = raw_input('\nwalking towards my house...')
 
-a3 = raw_input('')
+	elif re.search('[Tt]ree', whereto):
+		c1 = raw_input('\nwalking towards a tree...')
+		this_tree = Tree('maple', 5, 1)
+		this_tree.draw()
+		def tree_actions():
+			action = raw_input('\nwhat do you want to do? (shake the tree, chop wood, cut down the tree) ')
+			if re.search('[Ss]hake', action):
+				this_tree.shake()
+				print('\nmy pocket contains:')
+				my_pocket.list()
+			elif re.search('[Cc]hop.*[Ww]ood', action):
+				pass
+			elif re.search('[Dd]own.*[Tt]ree', action):
+				pass
+			else: pass
 
-fishing = raw_input('do you want to go fishing? ')
-x = re.search('^[yY]', fishing)
-y = re.search('^[oO]', fishing)
-if x or y:
-	a2 = raw_input('\ngoing to the ocean...')
-	myocean = Ocean(['dace', 'sea bass', 'horse mackerel', 'red snapper', 'barred knifejaw', 'sea bass', 'sea bass', 'olive flounder', 'dace', 'shark'])
-	myocean.fishin()
-	a4 = raw_input('')
-	print('my pocket contains: ')
-	my_pocket.list()
-	print('')
+		tree_actions()
+		leave = raw_input('do you want to go somewhere else? ')
+		if re.search('^[Nn]', leave):
+			tree_actions()
+		elif re.search('^[Yy]', leave):
+			pass
 
-remove = raw_input('\ndo you want to take anything out of your pocket? ')
-x = re.search('^[yY]', remove)
-y = re.search('^[oO]', remove)
-if x or y:
-	removewhat = raw_input('what would you like to take out of your pocket? ')
-	if removewhat == 'all' or removewhat == 'everything':
-		my_pocket.empty()
+	elif re.search('[Aa]irport', whereto) or re.search('[Pp]lane', whereto):
+		d1 = raw_input('\nwalking to the airport...')
+
+	elif re.search('[Rr]iver', whereto):
+		e1 = raw_input('\nwalking towards a river...')
+
+	elif re.search('[Ss]tore', whereto) or re.search('[Nn]ook.*[Cc]ranny', whereto):
+		f1 = raw_input("\nwalking to nook's cranny...")
+
+	elif re.search('[Mm]useum', whereto):
+		g1 = raw_input('\nwalking to the museum...')
+
+	elif re.search('[Rr]esident.*[Ss]ervices', whereto):
+		h1 = raw_input('\nwalking to resident services...')
+
+	elif re.search('[Nn]o', whereto) or re.search('[Ee]xit', whereto) or re.search('[Qq]uit', whereto) or re.search('[Ee]nd', whereto):
+		end = raw_input('\ndo you want to quit animalcrossing? ')
+		if re.search('^[Yy]', end):
+			return 'quit'
+		else: pass
+
 	else:
-		items = re.split(",\s", removewhat)
-		for item in items:
-			my_pocket.takeout(item)
+		print("some places you can go are:\n   the beach\n   my house\n   a tree\n   the airport\n   the ocean\n   a river\n   nook's cranny (the store)\n   the museum\n   resident services\n")
+	
+	action = 'hi'
 
-print('\nmy pocket contains:')
-my_pocket.list()
-print('')
+	if action == 'access pocket' or action == 'ap':
+		print('my pocket contains: ')
+		my_pocket.list()
+		print('')
+		remove = raw_input('\ndo you want to take anything out of your pocket? ')
+		remove_y = re.search('^[yY]', remove)
+		remove_o = re.search('^[oO]', remove)
+		if remove_y or remove_o:
+			removewhat = raw_input('what would you like to take out of your pocket? ')
+			if removewhat == 'all' or removewhat == 'everything':
+				my_pocket.empty()
+			else:
+				items = re.split(",\s", removewhat)
+				for item in items:
+					my_pocket.takeout(item)
 
-#walk = raw_input('do you want to walk around your island? ')
+			print('\nmy pocket contains:')
+			my_pocket.list()
+			print('')
+
+for x in range(5):
+	if main() == 'quit':
+		f = open(name+'pocket.txt', 'w')
+		lpocket = {
+			'name':name,
+			'objects':my_pocket.inventory,
+			'spaces':my_pocket.spaces
+		}
+		y = json.dumps(lpocket)
+		f.write(y)
+		f.close()
+		exit()
+	else: pass
 
 f = open(name+'pocket.txt', 'w')
 lpocket = {
