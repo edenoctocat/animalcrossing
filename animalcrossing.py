@@ -35,12 +35,13 @@ class Tree:
 			stick = Stick()
 			stick.draw()
 			pickup = raw_input('do you want to pick up the stick? ')
-			if pickup == 'yes':
+			if re.search('[Yy]', pickup):
 				my_pocket.add('stick')
 			else: 
 				pass
 		elif itemfromtree == 'bell':
 			print('\na bell fell out of the tree')
+			my_wallet.add(10)
 		else:
 			print('\nnothing fell out of the tree')
 
@@ -180,34 +181,57 @@ class Pocket(Player):
 		del self.inventory[:]
 
 	def list(self):
+		print('my pocket contains:')
 		for object in self.inventory: 
 			print(object)
+
+class Wallet(Player):
+	def __init__(self, bells):
+		self.bells = bells
+
+	def add(self, amount):
+		int(amount)
+		self.bells += amount
+
+	def takeout(self, amount):
+		int(amount)
+		self.bells -= amount
+
+	def numbells(self):
+		mybells = str(self.bells)
+		print('I have ' + mybells + ' bells')
+
+f = open('launchscreen.txt', 'r')
+print(f.read())
+f.close()
+
+a0 = raw_input('')
 
 name = raw_input('name: ')
 
 try:
-	f = open(name+'pocket.txt', 'r')
-	x = f.read()
+	savedgame = open(name+'game.txt', 'r')
+	x = savedgame.read()
 	y = json.loads(x)
-	f.close()
-	print(y['name'])
-	for object in y['objects']:
-		print(object)
-	print(y['spaces'])
-	my_pocket = Pocket(y['objects'], y['spaces'])
+	savedgame.close()
+	my_pocket = Pocket(y['pocketobjects'], y['pocketspaces'])
+	my_wallet = Wallet(y['mybells'])
 except:
-	f = open(name+'pocket.txt', 'w')
+	f = open(name+'game.txt', 'w')
 	f.close()
-	pocket = {
+	game = {
 		'name':name,
-		'objects':[],
-		'spaces':5
+		'pocketobjects':[],
+		'pocketspaces':5,
+		'mybells':0
 	}
-	my_pocket = Pocket(pocket['objects'], pocket['spaces'])
+	my_pocket = Pocket(game['pocketobjects'], game['pocketspaces'])
+	my_wallet = Wallet(game['mybells'])
 
-print('\nmy pocket contains:')
 my_pocket.list()
-print('')		
+print('')
+my_wallet.numbells()
+print('')
 
 def main():
 #	print('options for things to do: \n   shake a tree (st) \n   go fishing (fi) \n   access pocket (ap) \n   walk around the island (wk) \n   chop wood (cw) \n   craft DIY projects (diy) \n   collect shells (cs) \n   catch bugs (cb) \n   go to house/tent (gth) \n   look at nook phone (lnp) \n') 
@@ -220,14 +244,12 @@ def main():
 				myocean = Ocean(['dace', 'sea bass', 'horse mackerel', 'red snapper', 'barred knifejaw', 'sea bass', 'sea bass', 'olive flounder', 'dace', 'shark'])
 				myocean.fishin()
 				a2 = raw_input('')
-				print('my pocket contains: ')
 				my_pocket.list()
 				print('')
 			elif re.search('[Bb]eachcomb', action) or re.search('[Ss]hell', action):
 				this_beach = Beach(['venus comb shell', 'sand dollar', 'cowrie shell', 'message bottle', 'conch shell'])
 				this_beach.comb()
 				a3 = raw_input('')
-				print('my pocket contains: ')
 				my_pocket.list()
 				print('')
 			else: pass
@@ -250,8 +272,9 @@ def main():
 			action = raw_input('\nwhat do you want to do? (shake the tree, chop wood, cut down the tree) ')
 			if re.search('[Ss]hake', action):
 				this_tree.shake()
-				print('\nmy pocket contains:')
 				my_pocket.list()
+				my_wallet.numbells()
+				print('')
 			elif re.search('[Cc]hop.*[Ww]ood', action):
 				pass
 			elif re.search('[Dd]own.*[Tt]ree', action):
@@ -292,7 +315,6 @@ def main():
 	action = 'hi'
 
 	if action == 'access pocket' or action == 'ap':
-		print('my pocket contains: ')
 		my_pocket.list()
 		print('')
 		remove = raw_input('\ndo you want to take anything out of your pocket? ')
@@ -307,30 +329,31 @@ def main():
 				for item in items:
 					my_pocket.takeout(item)
 
-			print('\nmy pocket contains:')
 			my_pocket.list()
 			print('')
 
 for x in range(5):
 	if main() == 'quit':
-		f = open(name+'pocket.txt', 'w')
-		lpocket = {
+		f = open(name+'game.txt', 'w')
+		mygame = {
 			'name':name,
-			'objects':my_pocket.inventory,
-			'spaces':my_pocket.spaces
+			'pocketobjects':my_pocket.inventory,
+			'pocketspaces':my_pocket.spaces,
+			'mybells':my_wallet.bells
 		}
-		y = json.dumps(lpocket)
+		y = json.dumps(mygame)
 		f.write(y)
 		f.close()
 		exit()
 	else: pass
 
-f = open(name+'pocket.txt', 'w')
-lpocket = {
+f = open(name+'game.txt', 'w')
+mygame = {
 	'name':name,
-	'objects':my_pocket.inventory,
-	'spaces':my_pocket.spaces
+	'pocketobjects':my_pocket.inventory,
+	'pocketspaces':my_pocket.spaces,
+	'mybells':my_wallet.bells
 }
-y = json.dumps(lpocket)
+y = json.dumps(mygame)
 f.write(y)
 f.close()
