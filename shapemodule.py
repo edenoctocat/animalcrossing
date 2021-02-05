@@ -5,7 +5,7 @@ class Canvas:
 		self.data = [['  '] * width for i in range(height)]
 
 	def setpixel(self, brush, row, col):
-		self.data[row][col] = brush
+		self.data[int(row)][int(col)] = brush
 
 	def getpixel(self, row, col):
 		return self.data[row][col]
@@ -45,7 +45,7 @@ class Circle(Shape):
 		self.edgey = self.y - (self.radius - 1)
 
 	def paint(self, canvas, brush):
-		for y in range((self.diameter - self.startwidth) / 2):
+		for y in range(int((self.diameter - self.startwidth) / 2)):
 			numpixels = self.startwidth + (y * 2)
 			for x in range(numpixels):
 				canvas.setpixel(brush, (self.edgey + y), (self.edgex + ((self.diameter - self.startwidth) / 2) - y + x))
@@ -54,7 +54,7 @@ class Circle(Shape):
 			for x in range(self.diameter):
 				canvas.setpixel(brush, (self.edgey + ((self.diameter - self.startwidth) / 2) + y), (self.edgex + x))
 
-		for y in range((self.diameter - self.startwidth) / 2):
+		for y in range(int((self.diameter - self.startwidth) / 2)):
 			if y == 0: numpixels -= 0
 			else: numpixels -= 2
 			for x in range(numpixels):
