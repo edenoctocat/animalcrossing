@@ -20,18 +20,9 @@ class Tree:
 		self.probnothing = 10 - (probstick + probbell)
 
 	def shake(self):
-		itemsintree = []
-		numsticks = self.probstick * 10
-		for x in range(numsticks):
-			itemsintree.append('stick')
-		numbells = self.probbell * 10
-		for x in range(numbells):
-			itemsintree.append('bell')
-		numnothing = self.probnothing * 10
-		for x in range(numnothing):
-			itemsintree.append('nothing')
-		itemfromtree = random.choice(itemsintree)
-		if itemfromtree == 'stick':
+		itemsintree = ['stick', 'bell', 'nothing']
+		itemfromtree = random.choices(itemsintree, weights = [self.probstick, self.probbell, self.probnothing])
+		if itemfromtree == ['stick']:
 			print('\na stick fell out of the tree')
 			stick = Stick()
 			stick.draw()
@@ -40,11 +31,30 @@ class Tree:
 				my_pocket.add('stick')
 			else: 
 				pass
-		elif itemfromtree == 'bell':
+		elif itemfromtree == ['bell']:
 			print('\na bell fell out of the tree')
 			my_wallet.add(10)
 		else:
 			print('\nnothing fell out of the tree')
+
+	def chop(self):
+		wood = ['softwood', 'wood', 'hardwood']
+		c1 = input('\nchopping the tree...')
+		woodtype = random.choice(wood)
+		my_wood = Wood(woodtype)
+		print('\n' + my_wood.type + ' came from the tree')
+		my_wood.draw()
+		pickup = input('do you want to pick up the piece of ' + my_wood.type + '? ')
+		if re.search('[Yy]', pickup):
+			my_pocket.add(my_wood.type)
+		else: pass 
+
+	def cutdown(self):
+		cd1 = input('\ncutting down the tree...')
+		cd2 = input('\ntree is cut down')
+		self.drawfallen()
+		player.location = 'island'
+		cd3 = input('')
 
 	def draw(self):
 		if self.type == 'maple':
@@ -57,9 +67,44 @@ class Tree:
 
 		if self.type == 'cedar':
 			mycanvas = shapemodule.Canvas(40, 23)
-			box = shapemodule.Rectangle(10, 8, 8, 8)
-			box.paint(mycanvas, '* ')
+			triangle = shapemodule.Triangle(4, 45, 10, 3)
+			triangle.paint(mycanvas, '^ ')
+			triangle2 = shapemodule.Triangle(5, 45, 10, 6)
+			triangle2.paint(mycanvas, '^ ')
+			triangle3 = shapemodule.Triangle(6, 45, 10,  9)
+			triangle3.paint(mycanvas, '^ ')
+			trunk = shapemodule.Rectangle(9, 15, 3, 4)
+			trunk.paint(mycanvas, '| ')
 			mycanvas.display()
+
+	def drawfallen(self):
+		if self.type == 'maple':
+			mycanvas = shapemodule.Canvas(40, 23)
+			trunk = shapemodule.Rectangle(11, 11, 7, 3)
+			trunk.paint(mycanvas, '– ')
+			stump = shapemodule.Rectangle(7, 12, 3, 2)
+			stump.paint(mycanvas, '| ')
+			leaves = shapemodule.Circle(5, 22, 12)
+			leaves.paint(mycanvas, 'O ')
+			cover = shapemodule.Rectangle(19, 15, 7, 2)
+			cover.paint(mycanvas, '  ')
+			mycanvas.display()
+
+		if self.type == 'cedar':
+			mycanvas = shapemodule.Canvas(40, 23)
+			triangle = shapemodule.RightTri(4, 45, 25, 13, 'RU')
+			triangle.paint(mycanvas, '> ')
+			triangle2 = shapemodule.RightTri(5, 45, 21, 12, 'RU')
+			triangle2.paint(mycanvas, '> ')
+			triangle3 = shapemodule.RightTri(6, 45, 16, 11, 'RU')
+			triangle3.paint(mycanvas, '> ')
+			trunk = shapemodule.Rectangle(13, 14, 3, 3)
+			trunk.paint(mycanvas, '- ')
+			stump = shapemodule.Rectangle(9, 15, 3, 2)
+			stump.paint(mycanvas, '| ')
+			mycanvas.display()
+
+		
 
 class Stick:
 	def __init__(self):
@@ -76,6 +121,33 @@ class Stick:
 		leaf = shapemodule.Circle(2, 12, 7)
 		leaf.paint(mycanvas, '0 ')
 		mycanvas.display()
+
+class Wood(Tree):
+	def __init__(self, type):
+		self.type = type
+
+	def draw(self):
+		if self.type == 'softwood':
+		        mycanvas = shapemodule.Canvas(40, 22)
+        		end = shapemodule.RightTri(3, 45, 8, 8, 'LU')
+        		end.paint(mycanvas, '* ')
+        		length = shapemodule.Rectangle(9, 8, 5, 3)
+        		length.paint(mycanvas, '= ')
+        		mycanvas.display()
+		elif self.type == 'wood':
+		        mycanvas = shapemodule.Canvas(40, 22)
+		        end = shapemodule.RightTri(3, 45, 8, 8, 'LU')
+		        end.paint(mycanvas, '* ')
+        		length = shapemodule.Rectangle(9, 8, 5, 3)
+        		length.paint(mycanvas, '- ')
+        		mycanvas.display()
+		elif self.type == 'hardwood':
+        		mycanvas = shapemodule.Canvas(40, 22)
+        		end = shapemodule.RightTri(3, 45, 8, 8, 'LU')
+        		end.paint(mycanvas, '0 ')
+        		length = shapemodule.Rectangle(9, 8, 5, 3)
+        		length.paint(mycanvas, '- ')
+        		mycanvas.display()
 
 class BodyOfWater:
 	def __init__(self):
@@ -100,7 +172,11 @@ class River(BodyOfWater):
 		self.fishlist = fishlist
 
 	def fishin(self):
-		pass
+		r1 = input('\nwaiting for a fish to bite...')
+		r2 = input('\na fish bit the line!')
+		fish = random.choice(self.fishlist)
+		print('\nI caught a ' + fish)
+		my_pocket.add(fish)
 
 class Beach(Island):
 	def __init__(self, findlist):
@@ -209,15 +285,17 @@ class Wallet(Player):
 this_beach = Beach(['venus comb shell', 'sand dollar', 'cowrie shell', 'message bottle', 'conch shell'])
 myocean = Ocean(['dace', 'sea bass', 'horse mackerel', 'red snapper', 'barred knifejaw', 'sea bass', 'sea bass', 'olive flounder', 'dace', 'shark'])
 this_tree = Tree('maple', 5, 1)
+this_cedar = Tree('cedar', 4, 2)
 
 def parse_input(input, condition):
 	actions = {
 		'fish':'myocean.fishin()',
 		'beachcomb':'this_beach.comb()',
 		'shake':'this_tree.shake()',
-		'chop wood':'this_tree.chopwood()',
+		'chop wood':'this_tree.chop()',
 		'cut down':'this_tree.cutdown()'
 	}
+	
 
 	def select_action(myaction):
 		callaction = actions[myaction]
