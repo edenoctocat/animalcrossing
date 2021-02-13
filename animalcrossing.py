@@ -366,7 +366,7 @@ def main():
 
 	elif re.search('[Hh]ouse', whereto) or re.search('[Hh]ome', whereto):
 		if not(player.location == 'house'):
-			b1 = raw_input('\nwalking towards my house...')
+			b1 = input('\nwalking towards my house...')
 		else: pass
 		player.location = 'house'
 
