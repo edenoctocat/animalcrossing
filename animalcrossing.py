@@ -2,10 +2,21 @@ import random
 import shapemodule
 import re
 import json
+import requests
 
 class Island:
 	def __init__(self):
-		pass
+		self.weathertemp = None
+		self.weatherdescript = None
+
+	def getweather(self):
+		jsonweather = requests.get('http://api.openweathermap.org/data/2.5/weather?zip=10002,us&appid=49c7e86bda3a0c8b83bf1efb4cd59041&units=imperial')
+		pyweather = json.loads(jsonweather.text)
+		mainweather = pyweather['main']
+		self.weathertemp = mainweather['temp']
+		weather = pyweather['weather']
+		my_weather = weather[0]
+		self.weatherdescript = my_weather['description']
 
 class Player:
 	def __init__(self, name, location):
@@ -282,6 +293,7 @@ class Wallet(Player):
 		print('I have ' + mybells + ' bells')
 
 # main
+my_island = Island()
 this_beach = Beach(['venus comb shell', 'sand dollar', 'cowrie shell', 'message bottle', 'conch shell'])
 myocean = Ocean(['dace', 'sea bass', 'horse mackerel', 'red snapper', 'barred knifejaw', 'sea bass', 'sea bass', 'olive flounder', 'dace', 'shark'])
 this_tree = Tree('maple', 5, 1)
@@ -336,6 +348,10 @@ except:
 	}
 	my_pocket = Pocket(game['pocketobjects'], game['pocketspaces'])
 	my_wallet = Wallet(game['mybells'])
+
+my_island.getweather()
+print('it is ' + str(my_island.weathertemp) + ' degrees farenheit with ' + my_island.weatherdescript)
+q1 = input('') 
 
 my_pocket.list()
 print('')
