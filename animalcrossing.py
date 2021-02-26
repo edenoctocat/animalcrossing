@@ -168,8 +168,15 @@ class BodyOfWater:
 		pass
 
 class Ocean(BodyOfWater):
-	def __init__(self, fishlist):
-		self.fishlist = fishlist
+	def __init__(self):
+		self.fishlist = []
+		jsonfish = requests.get('http://acnhapi.com/v1/fish')
+		pyfish = json.loads(jsonfish.text)
+		self.fishinfo = pyfish
+		allfish = pyfish.keys()
+		for fish in allfish:
+			myfish = fish.replace('_', ' ')
+			self.fishlist.append(myfish)
 
 	def fishin(self):
 		o1 = input('\nwaiting for a fish to bite...')
@@ -179,8 +186,15 @@ class Ocean(BodyOfWater):
 		my_pocket.add(fish)
 
 class River(BodyOfWater):
-	def __init__(self, fishlist):
-		self.fishlist = fishlist
+	def __init__(self):
+		self.fishlist = []
+		jsonfish = requests.get('http://acnhapi.com/v1/fish')
+		pyfish = json.loads(jsonfish.text)
+		self.fishinfo = pyfish
+		allfish = pyfish.keys()
+		for fish in allfish:
+			myfish = fish.replace('_', ' ')
+			self.fishlist.append(myfish)
 
 	def fishin(self):
 		r1 = input('\nwaiting for a fish to bite...')
@@ -295,28 +309,55 @@ class Wallet(Player):
 # main
 my_island = Island()
 this_beach = Beach(['venus comb shell', 'sand dollar', 'cowrie shell', 'message bottle', 'conch shell'])
-myocean = Ocean(['dace', 'sea bass', 'horse mackerel', 'red snapper', 'barred knifejaw', 'sea bass', 'sea bass', 'olive flounder', 'dace', 'shark'])
+myocean = Ocean()
+myriver = River()
 this_tree = Tree('maple', 5, 1)
 this_cedar = Tree('cedar', 4, 2)
 
 def parse_input(input, condition):
 	actions = {
-		'fish':'myocean.fishin()',
-		'beachcomb':'this_beach.comb()',
-		'shake':'this_tree.shake()',
-		'chop wood':'this_tree.chop()',
-		'cut down':'this_tree.cutdown()'
+		'fish':{
+			'beach':'myocean.fishin()', 
+			'river':'myriver.fishin()'
+		},
+		'beachcomb':{
+			'beach':'this_beach.comb()'
+		},
+		'shake':{
+			'tree1':'this_tree.shake()'
+		},
+		'chop wood':{
+			'tree1':'this_tree.chop()'
+		},
+		'cut down':{
+			'tree1':'this_tree.cutdown()'
+		},
+		'quit':'quit',
+		'ap':'access pocket',
+		'np':'nook phone',
+		'diy':'diy project',
+		'stop':'close',
+		'y':'yes',
+		'n':'no'
 	}
 	
 
-	def select_action(myaction):
+	def select_action(myaction, condition):
 		callaction = actions[myaction]
-		eval(callaction)
+		eval(callaction[condition])
 
-	search = re.search('([Ff]ish|[Bb]eachcomb|[Ss]hake|[Cc]hop.wood|[Cc]ut.down)', input)
-	if not(search == None): 
-		action = search.group()
-		select_action(action)
+	actionsearch = re.search('([Ff]ish|[Bb]eachcomb|[Ss]hake|[Cc]hop.wood|[Cc]ut.down)', input)
+	quitsearch = re.search('([Ee]nd|[Qq]uit|[Ee]xit)', input)
+	personalactionsearch = re.search('(^[Yy]|^[Nn])', input)
+	if not(actionsearch == None): 
+		action = actionsearch.group()
+		select_action(action, condition)
+	elif not(quitsearch == None):
+		action = 'quit'
+	elif not(personalactionsearch == None):
+		action = personalactionsearch.group()
+	elif not(ynearch == None):
+		action = ynsearch.group()
 	else: print('no match')
 
 
@@ -368,7 +409,7 @@ def main():
 		player.location = 'beach'
 		def beach_actions():
 			action = input('\nwhat do you want to do? (go fishing, beachcombing) ')
-			parse_input(action, this_beach)
+			parse_input(action, 'beach')
 			a2 = input('')
 			my_pocket.list()
 			print('')
@@ -394,7 +435,7 @@ def main():
 		this_tree.draw()
 		def tree_actions():
 			action = input('\nwhat do you want to do? (shake the tree, chop wood, cut down the tree) ')
-			parse_input(action, this_tree)
+			parse_input(action, 'tree1')
 			my_pocket.list()
 			my_wallet.numbells()
 			print('')
@@ -417,6 +458,19 @@ def main():
 			e1 = input('\nwalking towards a river...')
 		else: pass
 		player.location = 'river'
+		def river_actions():
+			action = input('\nwhat do you want to do? (go fishing, jump over river) ')
+			parse_input(action, 'river')
+			a2 = input('')
+			my_pocket.list()
+			print('')
+
+		river_actions()
+		leave = input('do you want to go somewhere else? ')
+		if re.search('^[Nn]', leave):
+			river_actions()
+		elif re.search('^[Yy]', leave):
+			pass
 
 	elif re.search('[Ss]tore', whereto) or re.search('[Nn]ook.*[Cc]ranny', whereto):
 		if not(player.location == 'nooks cranny'):
