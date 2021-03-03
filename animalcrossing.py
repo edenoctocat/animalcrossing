@@ -170,38 +170,69 @@ class BodyOfWater:
 class Ocean(BodyOfWater):
 	def __init__(self):
 		self.fishlist = []
+		self.population = []
 		jsonfish = requests.get('http://acnhapi.com/v1/fish')
 		pyfish = json.loads(jsonfish.text)
 		self.fishinfo = pyfish
 		allfish = pyfish.keys()
 		for fish in allfish:
-			myfish = fish.replace('_', ' ')
-			self.fishlist.append(myfish)
+#			myfish = fish.replace('_', ' ')
+			self.fishlist.append(fish)
+
+	def populate(self):
+		for x in range(10):
+			fish = random.choice(self.fishlist)
+			thisfishinfo = self.fishinfo[fish]
+			thisfishavail = thisfishinfo['availability']
+			if thisfishavail['location'] == 'Sea':
+				self.population.append(Fish(fish, thisfishinfo))
+			else: x += 1
 
 	def fishin(self):
 		o1 = input('\nwaiting for a fish to bite...')
 		o2 = input('\na fish bit the line!')
-		fish = random.choice(self.fishlist)
-		print('\nI caught a ' + fish)
-		my_pocket.add(fish)
+		fish = random.choice(self.population)
+		print('\n' + fish.catchphrase)
+		my_pocket.add(fish.name)
 
 class River(BodyOfWater):
 	def __init__(self):
 		self.fishlist = []
+		self.population = []
 		jsonfish = requests.get('http://acnhapi.com/v1/fish')
 		pyfish = json.loads(jsonfish.text)
 		self.fishinfo = pyfish
 		allfish = pyfish.keys()
 		for fish in allfish:
-			myfish = fish.replace('_', ' ')
-			self.fishlist.append(myfish)
+			self.fishlist.append(fish)
+
+	def populate(self):
+		for x in range(10):
+			fish = random.choice(self.fishlist)
+			thisfishinfo = self.fishinfo[fish]
+			thisfishavail = thisfishinfo['availability']
+			if thisfishavail['location'] == 'River':
+				self.population.append(Fish(fish, thisfishinfo))
+			else: x += 1
 
 	def fishin(self):
 		r1 = input('\nwaiting for a fish to bite...')
 		r2 = input('\na fish bit the line!')
-		fish = random.choice(self.fishlist)
-		print('\nI caught a ' + fish)
-		my_pocket.add(fish)
+		fish = random.choice(self.population)
+		print('\n' + fish.catchphrase)
+		my_pocket.add(fish.name)
+
+class Fish:
+	def __init__(self, name, info):
+		fixname = name.replace('_', ' ')
+		self.name = fixname
+		self.info = info
+		infoavail = self.info['availability']
+		self.location = infoavail['location']
+		self.rarity = infoavail['rarity']
+		self.catchphrase = self.info['catch-phrase']
+		self.museumphrase = self.info['museum-phrase']
+		self.price = self.info['price']
 
 class Beach(Island):
 	def __init__(self, findlist):
@@ -223,8 +254,8 @@ class Beach(Island):
 			pass 
 
 class Shell(Beach):
-	def __init__(self, type):
-		self.type = type
+	def __init__(self, name):
+		self.name = name
 
 	def draw(self):
 		my_canvas = shapemodule.Canvas(40, 12)
@@ -310,7 +341,9 @@ class Wallet(Player):
 my_island = Island()
 this_beach = Beach(['venus comb shell', 'sand dollar', 'cowrie shell', 'message bottle', 'conch shell'])
 myocean = Ocean()
+myocean.populate()
 myriver = River()
+myriver.populate()
 this_tree = Tree('maple', 5, 1)
 this_cedar = Tree('cedar', 4, 2)
 
