@@ -23,7 +23,24 @@ class Player:
 		self.name = name
 		self.location = location
 
-class Tree:
+class Forest:
+	def __init__(self, maplenum, cedarnum):
+		self.maplenum = maplenum
+		self.cedarnum = cedarnum
+		self.treenum = maplenum + cedarnum
+		self.trees = []
+
+	def populate(self):
+		for x in range(self.maplenum):
+			probstick = random.randint(2, 7)
+			probbell = random.randint(0, 3)
+			self.trees.append(Tree('maple', probstick, probbell))
+		for y in range(self.cedarnum):
+			probstick = random.randint(2, 7)
+			probbell = random.randint(0, 3)
+			self.trees.append(Tree('cedar', probstick, probbell))
+
+class Tree(Forest):
 	def __init__(self, type, probstick, probbell):
 		self.type = type
 		self.probstick = probstick
@@ -117,7 +134,7 @@ class Tree:
 
 		
 
-class Stick:
+class Stick(Tree):
 	def __init__(self):
 		pass
 
@@ -288,6 +305,17 @@ class Pocket(Player):
 		self.inventory = inventory
 		self.spaces = spaces
 
+	def access(self):
+		self.list()
+		action = input('\nwhat do you want to do? (drop something, hold somthing, empty pocket) ') 
+		if re.search('([Dd]rop|[Rr]emove)', action):
+			dropwhat = input('\nwhat do you want to drop? ')
+			self.takeout(dropwhat)
+		elif re.search('[Hh]old', action):
+			pass
+		elif re.search('[Ee]mpty', action):
+			self.empty()
+
 	def add(self, object):
 		if self.checkspaces() == False:
 			print('\nHuh? My pockets are full.')
@@ -344,7 +372,9 @@ myocean = Ocean()
 myocean.populate()
 myriver = River()
 myriver.populate()
-this_tree = Tree('maple', 5, 1)
+myforest = Forest(10, 10)
+myforest.populate()
+this_maple = Tree('maple', 5, 1)
 this_cedar = Tree('cedar', 4, 2)
 
 def parse_input(input, condition):
@@ -365,32 +395,34 @@ def parse_input(input, condition):
 		'cut down':{
 			'tree1':'this_tree.cutdown()'
 		},
-		'quit':'quit',
-		'ap':'access pocket',
-		'np':'nook phone',
+		'ap':'my_pocket.access()',
+		'np':'noo kphone',
 		'diy':'diy project',
 		'stop':'close',
-		'y':'yes',
-		'n':'no'
 	}
 	
 
 	def select_action(myaction, condition):
 		callaction = actions[myaction]
-		eval(callaction[condition])
+		if type(callaction) == dict: 
+			eval(callaction[condition])
+		else: 
+			eval(callaction)			
 
 	actionsearch = re.search('([Ff]ish|[Bb]eachcomb|[Ss]hake|[Cc]hop.wood|[Cc]ut.down)', input)
 	quitsearch = re.search('([Ee]nd|[Qq]uit|[Ee]xit)', input)
-	personalactionsearch = re.search('(^[Yy]|^[Nn])', input)
+	personalactionsearch = re.search('(ap|np|diy|stop)', input)
+	ynsearch = re.search('(^[Yy]|^[Nn])', input)
 	if not(actionsearch == None): 
 		action = actionsearch.group()
 		select_action(action, condition)
 	elif not(quitsearch == None):
-		action = 'quit'
+		return 'quit'
 	elif not(personalactionsearch == None):
 		action = personalactionsearch.group()
-	elif not(ynearch == None):
-		action = ynsearch.group()
+		select_action(action, condition)
+	elif not(ynsearch == None):
+		return ynsearch.group()
 	else: print('no match')
 
 
@@ -448,7 +480,7 @@ def main():
 			print('')
 
 		beach_actions()
-		leave = input('do you want to go somewhere else? ')
+		leave = input('do you want to go somewhere else? (y/n) ')
 		if re.search('^[Nn]', leave):
 			beach_actions()
 		elif re.search('^[Yy]', leave):
@@ -465,6 +497,8 @@ def main():
 			c1 = input('\nwalking towards a tree...')
 		else: pass
 		player.location = 'tree'
+		global this_tree
+		this_tree = random.choice(myforest.trees)
 		this_tree.draw()
 		def tree_actions():
 			action = input('\nwhat do you want to do? (shake the tree, chop wood, cut down the tree) ')
@@ -474,7 +508,7 @@ def main():
 			print('')
 
 		tree_actions()
-		leave = input('do you want to go somewhere else? ')
+		leave = input('do you want to go somewhere else? (y/n) ')
 		if re.search('^[Nn]', leave):
 			tree_actions()
 		elif re.search('^[Yy]', leave):
@@ -499,7 +533,7 @@ def main():
 			print('')
 
 		river_actions()
-		leave = input('do you want to go somewhere else? ')
+		leave = input('do you want to go somewhere else? (y/n) ')
 		if re.search('^[Nn]', leave):
 			river_actions()
 		elif re.search('^[Yy]', leave):
@@ -524,7 +558,7 @@ def main():
 		player.location = 'resident services plaza'
 
 	elif re.search('[Nn]o', whereto) or re.search('[Ee]xit', whereto) or re.search('[Qq]uit', whereto) or re.search('[Ee]nd', whereto):
-		end = input('\ndo you want to quit animalcrossing? ')
+		end = input('\ndo you want to quit animalcrossing? (y/n) ')
 		if re.search('^[Yy]', end):
 			return 'quit'
 		else: pass
