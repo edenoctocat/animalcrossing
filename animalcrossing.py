@@ -3,6 +3,7 @@ import shapemodule
 import re
 import json
 import requests
+import pickle
 
 class Island:
 	def __init__(self):
@@ -60,8 +61,6 @@ class Tree(Forest):
 		self.draw()
 		action = input('\nwhat do you want to do? (shake the tree, chop wood, cut down the tree) ')
 		parse_input(action, 'tree')
-		my_pocket.list()
-		my_wallet.numbells()
 		print('')
 
 	def shake(self):
@@ -248,7 +247,6 @@ class River(BodyOfWater):
 		action = input('\nwhat do you want to do? (go fishing, jump over river) ')
 		parse_input(action, 'river')
 		a2 = input('')
-		my_pocket.list()
 		print('')
 
 	def populate(self):
@@ -291,7 +289,6 @@ class Beach(Island):
 		action = input('\nwhat do you want to do? (go fishing, beachcombing) ')
 		parse_input(action, 'beach')
 		a2 = input('')
-		my_pocket.list()
 		print('')
 		
 	def comb(self):
@@ -399,11 +396,14 @@ class Pocket(Player):
 		self.spaces = spaces
 
 	def access(self):
+		print('')
 		self.list()
 		action = input('\nwhat do you want to do? (drop something, hold somthing, empty pocket) ') 
-		if re.search('([Dd]rop|[Rr]emove)', action):
-			dropwhat = input('\nwhat do you want to drop? ')
-			self.takeout(dropwhat)
+		if re.search('[Dd]rop', action):
+			dropobjects = action[5:]
+			dropobjects = dropobjects.split(', ')
+			for object in dropobjects:
+				self.takeout(object)
 		elif re.search('[Hh]old', action):
 			pass
 		elif re.search('[Ee]mpty', action):
@@ -487,8 +487,8 @@ def parse_input(input, condition):
 		'store':'nookscranny.store_actions()',
 		'museum':'museum.museum_actions()',
 		'resident services':'residentservices.residentservices_actions()',
-		'ap':'my_pocket.access()',
-		'np':'nookphone.access()',
+		'pocket':'my_pocket.access()',
+		'nook phone':'nookphone.access()',
 		'diy':'diy project'
 	}
 	
@@ -496,32 +496,35 @@ def parse_input(input, condition):
 	def select_action(myaction, condition):
 		callaction = actions[myaction]
 		if type(callaction) == dict: 
-			eval(callaction[condition])
+			try: 
+				eval(callaction[condition])
+			except: 
+				global thisreturn
+				thisreturn = 'incorrect place:' + myaction + ':' + condition
 		else: 
 			eval(callaction)			
 
-	actionsearch = re.search('([Ff]ish|[Bb]eachcomb|[Ss]hake|[Cc]hop.wood|[Cc]ut.down)', input)
+	actionsearch = re.search('(fish|beachcomb|shake|chop.wood|cut.down)', input)
 	placesearch = re.search('(beach|ocean|river|tree|house|airport|nook.*cranny|store|museum|resident.*services)', input)
 	quitsearch = re.search('([Ee]nd|[Qq]uit|[Ee]xit)', input)
-	personalactionsearch = re.search('(ap|np|diy|stop)', input)
+	personalactionsearch = re.search('(pocket|nook.phone|diy|stop)', input)
 	ynsearch = re.search('(^[Yy]|^[Nn])', input)
 	global thisreturn
-	thisreturn = ''
-	if not(actionsearch == None): 
+	thisreturn = 'hello'
+	if actionsearch: 
 		action = actionsearch.group()
 		select_action(action, condition)
-	if not(placesearch == None): 
+	elif placesearch: 
 		place = placesearch.group()
 		select_action(place, condition)
-	elif not(quitsearch == None):
+	elif quitsearch:
 		thisreturn = 'quit'
-	elif not(personalactionsearch == None):
+	elif personalactionsearch:
 		action = personalactionsearch.group()
 		select_action(action, condition)
-	elif not(ynsearch == None):
+	elif ynsearch:
 		thisreturn = ynsearch.group()
 	else: thisreturn = 'no match'
-
 
 f = open('launchscreen.txt', 'r')
 print(f.read())
@@ -566,7 +569,7 @@ my_river = River()
 my_river.populate()
 my_forest = Forest(10, 10)
 my_forest.populate()
-#my_house = House('1 small room', ['cot', 'lamp', 'radio'], [])
+#my_house = House('tent', ['cot', 'lamp', 'radio'], [])
 museum = Museum([], [], [])
 nookscranny = Store(['fishing rod', 'net', 'shovel', 'alarm clock', 'teapot and teacup', 'electric fan'])
 airport = Airport()
@@ -584,7 +587,7 @@ print('')
 
 def main():
 #	print('options for things to do: \n   shake a tree (st) \n   go fishing (fi) \n   access pocket (ap) \n   walk around the island (wk) \n   chop wood (cw) \n   craft DIY projects (diy) \n   collect shells (cs) \n   catch bugs (cb) \n   go to house/tent (gth) \n   look at nook phone (lnp) \n') 
-	whereto = input('\nwhere do you want to go? ')
+	whereto = input('\nwhere do you want to go/what do you want to do? ')
 	parse_input(whereto, player.location)
 	if thisreturn == 'quit':
 		end = input('\ndo you want to quit animalcrossing? (y/n) ')
@@ -592,65 +595,15 @@ def main():
 			return 'quit'
 		else: pass
 
+	elif re.search('incorrect.place', thisreturn):
+		returns = thisreturn.split(':')
+		print('\nyou cannot ' + returns[1] + ' at the ' + returns[2])
+
 	elif thisreturn == 'no match':
 		print("some places you can go are:\n   the beach\n   my house\n   a tree\n   the airport\n   the ocean\n   a river\n   nook's cranny (the store)\n   the museum\n   resident services\n")
 
-#	if re.search('[Bb]each', whereto) or re.search('[Oo]cean', whereto):
-
-#		beach_actions()
-#		leave = input('do you want to go somewhere else? (y/n) ')
-#		if re.search('^[Nn]', leave):
-#			beach_actions()
-#		elif re.search('^[Yy]', leave):
-#			pass
-
-#	elif re.search('[Hh]ouse', whereto) or re.search('[Hh]ome', whereto):
-
-#	elif re.search('[Tt]ree', whereto):
-
-#		tree_actions()
-#		leave = input('do you want to go somewhere else? (y/n) ')
-#		if re.search('^[Nn]', leave):
-#			tree_actions()
-#		elif re.search('^[Yy]', leave):
-#			pass
-
-#	elif re.search('[Aa]irport', whereto) or re.search('[Pp]lane', whereto):
-
-#	elif re.search('[Rr]iver', whereto):
-
-#		river_actions()
-#		leave = input('do you want to go somewhere else? (y/n) ')
-#		if re.search('^[Nn]', leave):
-#			river_actions()
-#		elif re.search('^[Yy]', leave):
-#			pass
-
-#	elif re.search('[Ss]tore', whereto) or re.search('[Nn]ook.*[Cc]ranny', whereto):
-
-#	elif re.search('[Mm]useum', whereto):
-
-#	elif re.search('[Rr]esident.*[Ss]ervices', whereto) or re.search('[Pp]laza', whereto):
-
-#	elif re.search('[Nn]o', whereto) or re.search('[Ee]xit', whereto) or re.search('[Qq]uit', whereto) or re.search('[Ee]nd', whereto):
-	
-for x in range(5):
-	if main() == 'quit':
-		f = open(name+'game.txt', 'w')
-		mygame = {
-			'name':name,
-			'pocketobjects':my_pocket.inventory,
-			'pocketspaces':my_pocket.spaces,
-			'mybells':my_wallet.bells,
-			'myhousetype':my_house.type,
-			'myhousefurniture':my_house.furniture,
-			'myhouseinventory':my_house.inventory
-		}
-		y = json.dumps(mygame)
-		f.write(y)
-		f.close()
-		exit()
-	else: pass
+while main() != 'quit':
+	print('ok')
 
 f = open(name+'game.txt', 'w')
 mygame = {
