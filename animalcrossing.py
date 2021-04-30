@@ -14,7 +14,8 @@ class Island:
 		jsonweather = requests.get('http://api.openweathermap.org/data/2.5/weather?zip=10002,us&appid=49c7e86bda3a0c8b83bf1efb4cd59041&units=imperial')
 		pyweather = json.loads(jsonweather.text)
 		mainweather = pyweather['main']
-		self.weathertemp = mainweather['temp']
+		weathertemp = mainweather['temp']
+		self.weathertemp = int(round(weathertemp))
 		weather = pyweather['weather']
 		my_weather = weather[0]
 		self.weatherdescript = my_weather['description']
@@ -151,8 +152,8 @@ class Tree(Forest):
 		
 
 class Stick(Tree):
-	def __init__(self):
-		pass
+	def __init__(self, name):
+		self.name = name
 
 	def draw(self):
 		mycanvas = shapemodule.Canvas(40, 22)
@@ -167,25 +168,25 @@ class Stick(Tree):
 		mycanvas.display()
 
 class Wood(Tree):
-	def __init__(self, type):
-		self.type = type
+	def __init__(self, name):
+		self.name = name
 
 	def draw(self):
-		if self.type == 'softwood':
+		if self.name == 'softwood':
 		        mycanvas = shapemodule.Canvas(40, 22)
         		end = shapemodule.RightTri(3, 45, 8, 8, 'LU')
         		end.paint(mycanvas, '* ')
         		length = shapemodule.Rectangle(9, 8, 5, 3)
         		length.paint(mycanvas, '= ')
         		mycanvas.display()
-		elif self.type == 'wood':
+		elif self.name == 'wood':
 		        mycanvas = shapemodule.Canvas(40, 22)
 		        end = shapemodule.RightTri(3, 45, 8, 8, 'LU')
 		        end.paint(mycanvas, '* ')
         		length = shapemodule.Rectangle(9, 8, 5, 3)
         		length.paint(mycanvas, '- ')
         		mycanvas.display()
-		elif self.type == 'hardwood':
+		elif self.name == 'hardwood':
         		mycanvas = shapemodule.Canvas(40, 22)
         		end = shapemodule.RightTri(3, 45, 8, 8, 'LU')
         		end.paint(mycanvas, '0 ')
@@ -277,9 +278,17 @@ class Fish:
 		self.museumphrase = self.info['museum-phrase']
 		self.price = self.info['price']
 
+	def draw(self):
+		mycanvas = shapemodule.Canvas(5, 5)
+		block = shapemodule.Rectangle(0, 0, 5, 5)
+		block.paint(mycanvas, '* ')
+
 class Beach(Island):
-	def __init__(self, findlist):
-		self.findlist = findlist
+	def __init__(self):
+		self.findlist = []
+
+	def populate(self):
+		self.findlist = [Shell('venus comb shell'), Shell('cowrie shell'), Shell('giant clam shell'), Shell('conch shell'), MessageBottle('message bottle', 'to whoever finds this, \n	i just found this diy project the other day and wanted to share it with someone. happy crafting! \n	best wishes, june')]
 
 	def beach_actions(self):
 		if not(player.location == 'beach'):
@@ -289,20 +298,22 @@ class Beach(Island):
 		action = input('\nwhat do you want to do? (go fishing, beachcombing) ')
 		parse_input(action, 'beach')
 		a2 = input('')
-		print('')
 		
 	def comb(self):
 		c1 = input('\nwalking along the beach...')
 		beachobject = random.choice(self.findlist)
-		print('\nI found a ' + beachobject)
-		if re.search('shell', beachobject + ' !'):
-			this_shell = Shell(beachobject)
-			this_shell.draw()
+		print('\nI found a ' + beachobject.name + '!')
+		if re.search('shell', beachobject.name):
+			beachobject.draw()
 		else:
 			pass
 		pickup = input('do you want to pick it up? ')
 		if re.search('^[Yy]', pickup):
 			my_pocket.add(beachobject)
+			if beachobject = 'message bottle':
+				open = input('do you want to open the message bottle? ')
+				if re.search('[Yy]', open):
+					this_message.open()
 		else:
 			pass 
 
@@ -335,6 +346,15 @@ class Shell(Beach):
 		base = shapemodule.Rectangle(3, 9, 5, 1)
 		base.paint(my_canvas, '- ')
 		my_canvas.display()
+
+class MessageBottle(Beach):
+	def __init__(self, name, message):
+		self.name = name
+		self.message = message
+
+	def open(self):
+		m0 = input('opening message bottle...')
+		print(self.message)
 
 class House(Player):
 	def __init__(self, type, furniture, inventory):
@@ -402,10 +422,15 @@ class Pocket(Player):
 		if re.search('[Dd]rop', action):
 			dropobjects = action[5:]
 			dropobjects = dropobjects.split(', ')
-			for object in dropobjects:
-				self.takeout(object)
+			for object in self.inventory:
+				if object.name in dropobjects:
+					self.takeout(object)
+					dropobjects.remove(object.name)
 		elif re.search('[Hh]old', action):
-			pass
+			holdobject = action[5:]
+			for object in self.inventory:
+				if object.name == holdobject:
+					object.draw()
 		elif re.search('[Ee]mpty', action):
 			self.empty()
 
@@ -436,11 +461,11 @@ class Pocket(Player):
 
 	def list(self):
 		if self.inventory == []:
-			print('I have nothing in my pocket')
+			print('i have nothing in my pocket')
 		else:
 			print('my pocket contains:')
 			for object in self.inventory: 
-				print(object)
+				print(object.name)
 
 class Wallet(Player):
 	def __init__(self, bells):
@@ -510,7 +535,7 @@ def parse_input(input, condition):
 	personalactionsearch = re.search('(pocket|nook.phone|diy|stop)', input)
 	ynsearch = re.search('(^[Yy]|^[Nn])', input)
 	global thisreturn
-	thisreturn = 'hello'
+	thisreturn = ''
 	if actionsearch: 
 		action = actionsearch.group()
 		select_action(action, condition)
@@ -537,32 +562,30 @@ player = Player(name, 'house')
 print('')
 
 try:
-	savedgame = open(player.name+'game.txt', 'r')
+	savedgame = open(player.name+'game.txt', 'rb')
 	x = savedgame.read()
-	y = json.loads(x)
+	game = pickle.load(x)
 	savedgame.close()
-	my_pocket = Pocket(y['pocketobjects'], y['pocketspaces'])
-	my_wallet = Wallet(y['mybells'])
-	my_house = House(y['myhousetype'], y['myhousefurniture'], y['myhouseinventory'])
+	my_pocket = game['pocket']
+	my_wallet = game['wallet']
+	my_house = game['house']
 
 except:
-	f = open(player.name+'game.txt', 'w')
+	f = open(player.name+'game.txt', 'x')
 	f.close()
+	my_pocket = Pocket([], 10)
+	my_wallet = Wallet(0)
+	my_house = House('tent', ['cot', 'lamp', 'radio'], [])
 	game = {
-		'name':player.name,
-		'pocketobjects':[],
-		'pocketspaces':10,
-		'mybells':0,
-		'myhousetype':'tent',
-		'myhousefurniture':['cot', 'lamp', 'radio'],
-		'myhouseinventory':[]
+		'name': player.name,
+		'pocket':my_pocket,
+		'wallet':my_wallet,
+		'house':my_house
 	}
-	my_pocket = Pocket(game['pocketobjects'], game['pocketspaces'])
-	my_wallet = Wallet(game['mybells'])
-	my_house = House(game['myhousetype'], game['myhousefurniture'], game['myhouseinventory'])
 
 my_island = Island()
-this_beach = Beach(['venus comb shell', 'sand dollar', 'cowrie shell', 'message bottle', 'conch shell'])
+this_beach = Beach()
+this_beach.populate()
 my_ocean = Ocean()
 my_ocean.populate()
 my_river = River()
@@ -605,16 +628,12 @@ def main():
 while main() != 'quit':
 	print('ok')
 
-f = open(name+'game.txt', 'w')
+f = open(name+'game.txt', 'wb')
 mygame = {
-	'name':name,
-	'pocketobjects':my_pocket.inventory,
-	'pocketspaces':my_pocket.spaces,
-	'mybells':my_wallet.bells,
-	'myhousetype':my_house.type,
-	'myhousefurniture':my_house.furniture,
-	'myhouseinventory':my_house.inventory
+	'name':player.name,
+	'pocket':my_pocket,
+	'wallet':my_wallet,
+	'house':my_house
 }
-y = json.dumps(mygame)
-f.write(y)
+pickle.dump(mygame, f)
 f.close()
